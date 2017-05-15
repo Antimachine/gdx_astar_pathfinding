@@ -55,9 +55,9 @@ public class MyNode {
     }
 
     public void addNeighbour(MyNode aNode) {
-        if (null != aNode) {
+        if (null != aNode)
             connections.add(new DefaultConnection<MyNode>(this, aNode));
-        }
+
     }
 
 
