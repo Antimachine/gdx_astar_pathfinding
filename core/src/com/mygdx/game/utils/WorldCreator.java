@@ -39,8 +39,7 @@ public class WorldCreator {
         MapLayer wallLayer = mapLayers.get("hedge");
 
         for (MapObject mapObject : wallLayer.getObjects()) {
-            Rectangle rectangle = generateRectangle(mapObject);
-
+            Rectangle rectangle = ((RectangleMapObject) mapObject).getRectangle();
             new B2Body.Builder(world)
                     .rectangle(rectangle)
                     .bodyType(BodyDef.BodyType.StaticBody)
@@ -52,17 +51,5 @@ public class WorldCreator {
         AStarMap aStarMap = new AStarMap(mapWidth, mapHeight);
         nodeDefiner.defineWall(world, aStarMap);
 
-    }
-
-    private Rectangle generateRectangle(MapObject mapObject) {
-        Rectangle rectangle = ((RectangleMapObject) mapObject).getRectangle();
-
-        rectangle.x /= GameManager.PPM;
-        rectangle.y /= GameManager.PPM;
-        rectangle.width /= GameManager.PPM;
-        rectangle.height /= GameManager.PPM;
-
-
-        return rectangle;
     }
 }

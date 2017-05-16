@@ -1,11 +1,13 @@
 package com.mygdx.game.utils;
 
+import com.badlogic.gdx.Game;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.physics.box2d.Body;
 import com.badlogic.gdx.physics.box2d.BodyDef;
 import com.badlogic.gdx.physics.box2d.FixtureDef;
 import com.badlogic.gdx.physics.box2d.PolygonShape;
 import com.badlogic.gdx.physics.box2d.World;
+import com.mygdx.game.GameManager;
 
 /**
  * Created by Evgheniy on 5/16/2017.
@@ -37,10 +39,12 @@ public class B2Body {
 
         public Builder rectangle(Rectangle rectangle) {
             this.rectangle = rectangle;
-            height(rectangle.getWidth() / 2);
-            width(rectangle.getHeight() / 2);
-            x(rectangle.x + rectangle.width / 2);
-            y(rectangle.y + rectangle.height / 2);
+
+            height((rectangle.getHeight() /GameManager.PPM )/ 2);
+            width((rectangle.getWidth() /  GameManager.PPM) / 2);
+            x((rectangle.x + rectangle.width / 2) /  GameManager.PPM);
+            y((rectangle.y + rectangle.height / 2) / GameManager.PPM );
+
             return this;
         }
 
