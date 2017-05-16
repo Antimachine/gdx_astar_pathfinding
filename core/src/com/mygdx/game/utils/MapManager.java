@@ -11,7 +11,7 @@ import com.badlogic.gdx.maps.tiled.TmxMapLoader;
 public enum MapManager {
     INSTANCE;
 
-    private TiledMap map;
+    public TiledMap map;
     public static int width;
     public static int height;
 
