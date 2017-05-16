@@ -30,6 +30,7 @@ public class MyNode {
 
     public Array<Connection<MyNode>> connections = new Array<Connection<MyNode>>();
     private boolean selected;
+    private boolean isWall = false;
 
     public MyNode(int x, int y) {
         this.x = x;
@@ -40,6 +41,13 @@ public class MyNode {
         selected = true;
     }
 
+    public boolean isWall() {
+        return isWall;
+    }
+
+    public void setIsWall() {
+        isWall = true;
+    }
 
     public void render(ShapeRenderer shapeRenderer) {
 
@@ -63,6 +71,6 @@ public class MyNode {
 
     @Override
     public String toString() {
-        return String.format(Locale.US, "Node #%d : x = %d ,y = %d", index, x, y);
+        return String.format(Locale.US, "Node #%d : x = %d ,y = %d , is Wall = %b", index, x, y, isWall());
     }
 }
