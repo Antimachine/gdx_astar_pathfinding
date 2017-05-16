@@ -1,9 +1,5 @@
 package com.mygdx.game.ai;
 
-import com.badlogic.gdx.physics.box2d.Fixture;
-import com.badlogic.gdx.physics.box2d.QueryCallback;
-import com.badlogic.gdx.physics.box2d.World;
-
 /**
  * Created by Evgheniy on 5/16/2017.
  */
@@ -16,6 +12,7 @@ public class AStarMap {
     public AStarMap(int width, int height) {
         this.width = width;
         this.height = height;
+        nodes = new MyNode[width][height];
         generateEmptyNodes(nodes, width, height);
 
     }
@@ -50,7 +47,6 @@ public class AStarMap {
         }
         return stringBuilder.toString();
     }
-
 
 
 }
