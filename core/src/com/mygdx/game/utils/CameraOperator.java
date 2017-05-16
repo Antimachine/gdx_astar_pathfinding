@@ -10,13 +10,13 @@ import com.badlogic.gdx.graphics.Camera;
 
 public class CameraOperator {
     private final Camera camera;
-    private float CAMERA_SHIFT = 1;
+    private float CAMERA_SHIFT = 2;
 
     public CameraOperator(Camera camera) {
         this.camera = camera;
     }
 
-    public void handleMovings() {
+    public void handleUserActions() {
         if (Gdx.input.isKeyPressed(Input.Keys.LEFT))
             camera.position.x -= CAMERA_SHIFT;
         else if (Gdx.input.isKeyPressed(Input.Keys.RIGHT))
