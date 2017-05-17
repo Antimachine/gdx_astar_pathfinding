@@ -12,7 +12,7 @@ public class AStarMap {
     public AStarMap(int width, int height) {
         this.width = width;
         this.height = height;
-        nodes = new MyNode[width][height];
+        nodes = new MyNode[height][width];
         generateEmptyNodes(nodes, width, height);
 
     }
@@ -36,7 +36,9 @@ public class AStarMap {
         return nodes[x][y];
     }
 
-
+    /**
+     * Representation will be rotated to 90 degree clockwise.
+     * */
     @Override
     public String toString() {
         StringBuilder stringBuilder = new StringBuilder();
