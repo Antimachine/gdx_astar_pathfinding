@@ -1,6 +1,9 @@
 package com.mygdx.game.ai;
 
+import com.badlogic.gdx.ai.pfa.Heuristic;
 import com.badlogic.gdx.ai.pfa.indexed.IndexedAStarPathFinder;
+import com.badlogic.gdx.math.MathUtils;
+import com.badlogic.gdx.math.Vector2;
 
 /**
  * Created by Evgheniy on 5/15/2017.
@@ -8,87 +11,82 @@ import com.badlogic.gdx.ai.pfa.indexed.IndexedAStarPathFinder;
 
 public class PathFinder {
 
-    private final DefaultIndexGraphPath graphPath;
+    private final Heuristic<MyNode> heuristic;
+    private final DefaultIndexGraphPath graph;
     private IndexedAStarPathFinder<MyNode> indexedAStarPathFinder;
+    private final AStarMap map;
+
+    private static final int[][] NEIGHBORHOOD = new int[][]{
+            new int[]{-1, 0},
+            new int[]{0, -1},
+            new int[]{0, 1},
+            new int[]{1, 0},
+    };
 
 
-    public static final int ALLOWED_PATH = 1;
-    private final int[][] map;
-    private MyNode[][] nodes;
-
-    public PathFinder(int[][] map) {
+    public PathFinder(AStarMap map) {
         this.map = map;
-
-
-        graphPath = new DefaultIndexGraphPath();
-        nodes  = generateNodes();
-        nodes =  addNodeConnection(nodes);
-
-
-        indexedAStarPathFinder = new IndexedAStarPathFinder<MyNode>(graphPath);
-
-
-
+        heuristic = new ManhattanDistanceHeuristic();
+        graph = new DefaultIndexGraphPath();
+        indexedAStarPathFinder = new IndexedAStarPathFinder<MyNode>(graph);
+        findAllowedNodes(map);
     }
 
 
-    private MyNode[][] generateNodes() {
-        MyNode[][] nodes = new MyNode[map.length][map[0].length];
+    public MyNode findNextNode(Vector2 source, Vector2 target) {
+        int sourceX = MathUtils.floor(source.x);
+        int sourceY = MathUtils.floor(source.y);
 
-        for (int x = 0; x < map.length; x++) {
-            for (int y = 0; y < map.length; y++) {
-                if (map[x][y] == ALLOWED_PATH) {
-                    nodes[x][y] = new MyNode(x, y);
-                    graphPath.add(nodes[x][y]);
-                }
+        int targetX = MathUtils.floor(target.x);
+        int targetY = MathUtils.floor(target.y);
 
+        if (map == null
+                || crossedMapXBounds(sourceX)
+                || crossedMapYBounds(sourceY)
+                || crossedMapXBounds(targetX)
+                || crossedMapYBounds(targetY))
+            return null;
+
+        MyNode sourceNode = map.getNodeAt(sourceX, sourceY);
+        MyNode targetNode = map.getNodeAt(targetX, targetY);
+        graph.clear();
+        indexedAStarPathFinder.searchNodePath(sourceNode, targetNode, heuristic, graph);
+        return graph.getNodeCount() == 0 ? null : graph.get(0);
+    }
+
+    private boolean crossedMapXBounds(int xAxis) {
+        return xAxis < 0 || xAxis >= map.getWidth();
+    }
+
+    private boolean crossedMapYBounds(int yAxis) {
+        return yAxis < 0 || yAxis >= map.getHeight();
+    }
+
+    private void findAllowedNodes(AStarMap map) {
+        final int mapHeight = map.getHeight();
+        final int mapWidth = map.getWidth();
+
+
+        for (int y = 0; y < mapHeight; y++) {
+            for (int x = 0; x < mapWidth; x++) {
+                MyNode node = map.getNodeAt(x, y);
+                if (node.isWall()) continue;
+                addNodeNeighborHood(node);
             }
         }
-        return nodes;
     }
 
+    private void addNodeNeighborHood(MyNode node) {
+        for (int offset = 0; offset < NEIGHBORHOOD.length; offset++) {
+            int neighborX = node.x + NEIGHBORHOOD[offset][0];
+            int neighborY = node.y + NEIGHBORHOOD[offset][1];
+            boolean notCrossedXBounds = neighborX >= 0 && neighborX < map.getWidth();
+            boolean notCrossedYBounds = neighborY >= 0 && neighborY < map.getHeight();
 
-    public void calculatePath() {
-        MyNode startNode = nodes[4][0];
-        MyNode endNode = nodes[4][4];
-
-        graphPath.clear();
-
-        System.out.println("StarNode " + startNode);
-        System.out.println("EndNode " + endNode);
-        indexedAStarPathFinder.searchNodePath(startNode, endNode, new ManhattanDistanceHeuristic(), graphPath);
-
-        if (graphPath.nodes.size == 0) {
-            System.out.println("Path not Found");
-        } else {
-            System.out.println("Path founded");
-
-            for (MyNode node : graphPath.nodes) {
-                //node.select();
-                System.out.println(node);
-            }
+            if (notCrossedXBounds && notCrossedYBounds)
+                node.addNeighbour(new MyNode(neighborX, neighborY));
         }
-
-
     }
 
 
-    private void addNodeNeighbour(MyNode node, int x, int y) {
-        if (x >= 0 && x < nodes.length && y >= 0 && y < nodes.length)
-            node.addNeighbour(nodes[x][y]);
-    }
-
-    private MyNode[][] addNodeConnection(MyNode[][] myNodes) {
-        for (int x = 0; x < myNodes.length; x++) {
-            for (int y = 0; y < myNodes[0].length; y++) {
-                if (null != myNodes[x][y]) {
-                    addNodeNeighbour(myNodes[x][y], x - 1, y); // Node to left
-                    addNodeNeighbour(myNodes[x][y], x + 1, y); // Node to right
-                    addNodeNeighbour(myNodes[x][y], x, y - 1); // Node below
-                    addNodeNeighbour(myNodes[x][y], x, y + 1); // Node above
-                }
-            }
-        }
-        return myNodes;
-    }
 }
