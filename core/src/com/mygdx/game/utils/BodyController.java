@@ -11,9 +11,8 @@ import com.badlogic.gdx.physics.box2d.Body;
 
 public class ActorController {
 
-    public static final float movingSpeed = .5f;
+    public static final float movingSpeed = 2f;
     private final Body actor;
-    private int movementSpeed = 2;
 
     public ActorController(Body actor) {
         this.actor = actor;
@@ -33,8 +32,8 @@ public class ActorController {
         } else {
             actor.setLinearVelocity(0, 0);
         }
-        if (actor.getLinearVelocity().len2() > movementSpeed * movementSpeed) {
-            actor.setLinearVelocity(actor.getLinearVelocity().scl(movementSpeed / actor.getLinearVelocity().len()));
+        if (actor.getLinearVelocity().len2() > movingSpeed * movingSpeed) {
+            actor.setLinearVelocity(actor.getLinearVelocity().scl(movingSpeed / actor.getLinearVelocity().len()));
         }
 
 
