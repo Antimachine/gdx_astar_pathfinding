@@ -18,17 +18,15 @@ import com.mygdx.game.ai.AStarMap;
 
 public class WorldCreator {
 
-    private final TiledMap tiledMap;
     private final World world;
     private final NodeDefiner nodeDefiner;
 
-    public WorldCreator(TiledMap tiledMap, World world) {
-        this.tiledMap = tiledMap;
+    public WorldCreator(World world) {
         this.world = world;
         nodeDefiner = new NodeDefiner();
     }
 
-    public AStarMap generateMap() {
+    public AStarMap generateMap(TiledMap tiledMap) {
         MapLayers mapLayers = tiledMap.getLayers();
 
 
