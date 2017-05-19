@@ -20,7 +20,7 @@ public class AStarMap {
     private void generateEmptyNodes(MyNode[][] nodes, int width, int height) {
         for (int y = 0; y < height; y++) {
             for (int x = 0; x < width; x++)
-                nodes[y][x] = new MyNode(x, y);
+                nodes[y][x] = new MyNode(width, x, y);
         }
     }
 
@@ -33,12 +33,12 @@ public class AStarMap {
     }
 
     public MyNode getNodeAt(int x, int y) {
-        return nodes[x][y];
+        return nodes[y][x];
     }
 
     /**
      * Representation will be rotated to 90 degree clockwise.
-     * */
+     */
     @Override
     public String toString() {
         StringBuilder stringBuilder = new StringBuilder();
