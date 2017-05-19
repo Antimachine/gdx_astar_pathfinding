@@ -11,7 +11,7 @@ import com.badlogic.gdx.physics.box2d.Body;
 
 public class BodyController {
 
-    public static final float movingSpeed = 2f;
+    public static final float movingSpeed = 10f;
     private final Body actor;
     private final Body target;
 
@@ -22,21 +22,18 @@ public class BodyController {
     }
 
     public void handleActions() {
-        if (Gdx.input.isKeyPressed(Input.Keys.LEFT)) {
+        if (Gdx.input.isKeyPressed(Input.Keys.LEFT))
             actor.applyLinearImpulse(new Vector2(-movingSpeed, 0), actor.getWorldCenter(), true);
-        } else if (Gdx.input.isKeyPressed(Input.Keys.RIGHT)) {
+        else if (Gdx.input.isKeyPressed(Input.Keys.RIGHT))
             actor.applyLinearImpulse(new Vector2(movingSpeed, 0), actor.getWorldCenter(), true);
-
-        }else if(Gdx.input.isKeyPressed(Input.Keys.UP)){
+        else if (Gdx.input.isKeyPressed(Input.Keys.UP))
             actor.applyLinearImpulse(new Vector2(0, movingSpeed), actor.getWorldCenter(), true);
-        }else if(Gdx.input.isKeyPressed(Input.Keys.DOWN)){
+        else if (Gdx.input.isKeyPressed(Input.Keys.DOWN))
             actor.applyLinearImpulse(new Vector2(0, -movingSpeed), actor.getWorldCenter(), true);
-        } else {
+        else
             actor.setLinearVelocity(0, 0);
-        }
-        if (actor.getLinearVelocity().len2() > movingSpeed * movingSpeed) {
-            actor.setLinearVelocity(actor.getLinearVelocity().scl(movingSpeed / actor.getLinearVelocity().len()));
-        }
+
+        speedControl(actor);
 
 
     }
@@ -55,10 +52,12 @@ public class BodyController {
             target.setLinearVelocity(0, 0);
 
 
-        if (target.getLinearVelocity().len2() > 1) {
-            target.setLinearVelocity(target.getLinearVelocity().scl(1));
-        }
+        speedControl(target);
     }
 
-
+    private void speedControl(Body body) {
+        if (body.getLinearVelocity().len2() > movingSpeed * movingSpeed) {
+            body.setLinearVelocity(body.getLinearVelocity().scl(movingSpeed / body.getLinearVelocity().len()));
+        }
+    }
 }
