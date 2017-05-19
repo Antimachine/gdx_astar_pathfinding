@@ -52,8 +52,6 @@ public class MyPathFinder {
             return null;
 
         MyNode sourceNode = map.getNodeAt(sourceX, sourceY);
-        printConnections(sourceNode.connections);
-
         MyNode targetNode = map.getNodeAt(targetX, targetY);
         graphPath.clear();
         indexedAStarPathFinder.searchConnectionPath(sourceNode, targetNode, heuristic, graphPath);
