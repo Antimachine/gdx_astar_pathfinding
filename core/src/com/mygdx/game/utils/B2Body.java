@@ -1,6 +1,5 @@
 package com.mygdx.game.utils;
 
-import com.badlogic.gdx.Game;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.physics.box2d.Body;
 import com.badlogic.gdx.physics.box2d.BodyDef;
@@ -40,10 +39,10 @@ public class B2Body {
         public Builder rectangle(Rectangle rectangle) {
             this.rectangle = rectangle;
 
-            height((rectangle.getHeight() /GameManager.PPM )/ 2);
-            width((rectangle.getWidth() /  GameManager.PPM) / 2);
-            x((rectangle.x + rectangle.width / 2) /  GameManager.PPM);
-            y((rectangle.y + rectangle.height / 2) / GameManager.PPM );
+            height((rectangle.getHeight() / GameManager.PPM) / 2);
+            width((rectangle.getWidth() / GameManager.PPM) / 2);
+            x((rectangle.x + rectangle.width / 2) / GameManager.PPM);
+            y((rectangle.y + rectangle.height / 2) / GameManager.PPM);
 
             return this;
         }
@@ -115,7 +114,8 @@ public class B2Body {
         FixtureDef fixtureDef = new FixtureDef();
         fixtureDef.shape = polygonShape;
         fixtureDef.filter.categoryBits = categoryBits;
-        fixtureDef.filter.maskBits = maskBits;
+        if (maskBits != GameManager.EMPTY_BIT)
+            fixtureDef.filter.maskBits = maskBits;
 
         body.createFixture(fixtureDef);
         polygonShape.dispose();
