@@ -1,5 +1,8 @@
 package com.mygdx.game.ai;
 
+import com.badlogic.gdx.ai.pfa.Connection;
+import com.badlogic.gdx.ai.pfa.DefaultGraphPath;
+import com.badlogic.gdx.ai.pfa.GraphPath;
 import com.badlogic.gdx.ai.pfa.Heuristic;
 import com.badlogic.gdx.ai.pfa.indexed.IndexedAStarPathFinder;
 import com.badlogic.gdx.math.MathUtils;
@@ -12,8 +15,9 @@ import com.badlogic.gdx.math.Vector2;
 public class PathFinder {
 
     private final Heuristic<MyNode> heuristic;
-    private final DefaultIndexGraphPath graph;
-    private IndexedAStarPathFinder<MyNode> indexedAStarPathFinder;
+    private final GraphPath<Connection<MyNode>> graphPath;
+    //    private final DefaultIndexGraphPath graph;
+    private com.badlogic.gdx.ai.pfa.PathFinder<MyNode> indexedAStarPathFinder;
     private final AStarMap map;
 
     private static final int[][] NEIGHBORHOOD = new int[][]{
@@ -27,9 +31,9 @@ public class PathFinder {
     public PathFinder(AStarMap map) {
         this.map = map;
         heuristic = new ManhattanDistanceHeuristic();
-        graph = new DefaultIndexGraphPath();
-        indexedAStarPathFinder = new IndexedAStarPathFinder<MyNode>(graph);
-        findAllowedNodes(map);
+        graphPath = new DefaultGraphPath<>();
+        indexedAStarPathFinder = new IndexedAStarPathFinder<>(new Graph(map));
+        foundEmptyNodes(map);
     }
 
 
@@ -49,9 +53,13 @@ public class PathFinder {
 
         MyNode sourceNode = map.getNodeAt(sourceX, sourceY);
         MyNode targetNode = map.getNodeAt(targetX, targetY);
-        graph.clear();
-        indexedAStarPathFinder.searchNodePath(sourceNode, targetNode, heuristic, graph);
-        return graph.getNodeCount() == 0 ? null : graph.get(0);
+        System.out.println("SOURCE " + sourceNode);
+        System.out.println("TARGET " +targetNode);
+        graphPath.clear();
+       boolean b =  indexedAStarPathFinder.searchConnectionPath(sourceNode, targetNode, heuristic, graphPath);
+        System.out.println("path found " +b);
+        System.out.println(graphPath.getCount());
+        return graphPath.getCount() == 0 ? null : graphPath.get(0).getToNode();
     }
 
     private boolean crossedMapXBounds(int xAxis) {
@@ -62,7 +70,7 @@ public class PathFinder {
         return yAxis < 0 || yAxis >= map.getHeight();
     }
 
-    private void findAllowedNodes(AStarMap map) {
+    private void foundEmptyNodes(AStarMap map) {
         final int mapHeight = map.getHeight();
         final int mapWidth = map.getWidth();
 
@@ -84,7 +92,7 @@ public class PathFinder {
             boolean notCrossedYBounds = neighborY >= 0 && neighborY < map.getHeight();
 
             if (notCrossedXBounds && notCrossedYBounds)
-                node.addNeighbour(new MyNode(neighborX, neighborY));
+                node.addNeighbour(new MyNode(map.getHeight(),neighborX, neighborY));
         }
     }
 
