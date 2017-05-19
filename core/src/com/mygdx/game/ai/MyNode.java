@@ -2,8 +2,6 @@ package com.mygdx.game.ai;
 
 import com.badlogic.gdx.ai.pfa.Connection;
 import com.badlogic.gdx.ai.pfa.DefaultConnection;
-import com.badlogic.gdx.graphics.Color;
-import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.utils.Array;
 
 import java.util.Locale;
@@ -16,29 +14,26 @@ import java.util.Locale;
 public class MyNode {
     public final int x;
     public final int y;
-//    public final int width;
-//    public final int height;
-
-
-    public final static int TILE_SIZE = 50;
-    private final static int SPACE_BETWEEN_TILES = 2;
-    private static int counter = 0;
-
-
-    public final int index = counter++;
-
+    public final int index;
 
     public Array<Connection<MyNode>> connections = new Array<Connection<MyNode>>();
+
     private boolean selected;
     private boolean isWall = false;
 
-    public MyNode(int x, int y) {
+
+    public MyNode(int greaterMapMeasurement, int x, int y) {
         this.x = x;
         this.y = y;
+        index = x * greaterMapMeasurement + y;
     }
 
     public void select() {
         selected = true;
+    }
+
+    public boolean isSelected() {
+        return selected;
     }
 
     public boolean isWall() {
@@ -49,22 +44,12 @@ public class MyNode {
         isWall = true;
     }
 
-    public void render(ShapeRenderer shapeRenderer) {
-
-        if (selected)
-            shapeRenderer.setColor(Color.GREEN);
-        else
-            shapeRenderer.setColor(Color.RED);
-
-        shapeRenderer.line(x, y, x, y + TILE_SIZE);
-        shapeRenderer.line(x + TILE_SIZE, y, x, y + TILE_SIZE);
-        shapeRenderer.line(x, y + TILE_SIZE, x + TILE_SIZE, y + TILE_SIZE);
-        shapeRenderer.line(x, y, x + TILE_SIZE, y + TILE_SIZE);
-    }
-
     public void addNeighbour(MyNode aNode) {
-        if (null != aNode)
-            connections.add(new DefaultConnection<MyNode>(this, aNode));
+        if (null != aNode) {
+            connections.add(new DefaultConnection<>(this, aNode));
+            connections.shuffle();
+        }
+
 
     }
 
