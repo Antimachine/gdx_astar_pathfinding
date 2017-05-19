@@ -1,11 +1,11 @@
 package com.mygdx.game.screens;
 
 import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.Input;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.maps.tiled.renderers.OrthogonalTiledMapRenderer;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.Body;
@@ -19,10 +19,11 @@ import com.mygdx.game.MyAiImpl;
 import com.mygdx.game.ai.AStarMap;
 import com.mygdx.game.ai.MyNode;
 import com.mygdx.game.ai.MyPathFinder;
-import com.mygdx.game.utils.ActorController;
 import com.mygdx.game.utils.B2Body;
-import com.mygdx.game.utils.CameraOperator;
+import com.mygdx.game.utils.BodyController;
 import com.mygdx.game.utils.MapManager;
+import com.mygdx.game.utils.PathPrinter;
+import com.mygdx.game.utils.WallDrawer;
 import com.mygdx.game.utils.WorldCreator;
 
 /**
@@ -37,15 +38,18 @@ public class PlayScreen implements Screen {
     private OrthogonalTiledMapRenderer isometricTiledMapRenderer;
     private OrthographicCamera camera;
     private Viewport viewport;
-    private CameraOperator operator;
     private World world;
     private Box2DDebugRenderer boxDebugger;
-    private final ActorController actorController;
+    private final BodyController bodyController;
     private final MyPathFinder myPathFinder;
+    private final PathPrinter pathPrinter;
     private final Body actor;
     private final Body target;
     private float timer;
     private final B2Body.Builder box2dBuilder;
+    private final ShapeRenderer shapeRenderer;
+    private final AStarMap map;
+    private final WallDrawer wallDrawer;
 
     public PlayScreen(MyAiImpl game) {
         spriteBatch = game.spriteBatch;
@@ -53,7 +57,6 @@ public class PlayScreen implements Screen {
         MapManager.INSTANCE.loadMap(MAP_PATH);
 
         camera = new OrthographicCamera();
-        operator = new CameraOperator(camera);
 
 
         viewport = new FitViewport(GameManager.WORLD_WIDTH, GameManager.WORLD_HEIGHT, camera);
@@ -62,19 +65,22 @@ public class PlayScreen implements Screen {
         world = new World(Vector2.Zero, true);
 
 
-        WorldCreator worldCreator = new WorldCreator(MapManager.INSTANCE.map, world);
+        WorldCreator worldCreator = new WorldCreator(world);
 
-        AStarMap map = worldCreator.generateMap();
-        System.out.println(map);
+        map = worldCreator.generateMap(MapManager.INSTANCE.map);
 
 
         myPathFinder = new MyPathFinder(map);
-
+        pathPrinter = new PathPrinter(myPathFinder);
+        shapeRenderer = new ShapeRenderer();
 
         boxDebugger = new Box2DDebugRenderer();
 
         box2dBuilder = new B2Body.Builder(world);
 
+        wallDrawer = new WallDrawer(world, map, camera);
+
+        Gdx.input.setInputProcessor(wallDrawer);
 
         target = box2dBuilder.bodyType(BodyDef.BodyType.DynamicBody)
                 .categoryBits(GameManager.TARGET)
@@ -84,7 +90,6 @@ public class PlayScreen implements Screen {
                 .x(15)
                 .y(15)
                 .build().generateBody();
-        target.setAwake(true);
         actor = box2dBuilder.bodyType(BodyDef.BodyType.DynamicBody)
                 .categoryBits(GameManager.ACTOR)
                 .maskBits(GameManager.WALL)
@@ -94,7 +99,7 @@ public class PlayScreen implements Screen {
                 .y(20)
                 .build().generateBody();
 
-        actorController = new ActorController(actor);
+        bodyController = new BodyController(actor, target);
 
     }
 
@@ -112,38 +117,33 @@ public class PlayScreen implements Screen {
         isometricTiledMapRenderer.setView(camera);
         isometricTiledMapRenderer.render();
         world.step(1 / 60f, 8, 3);
-        operator.handleUserActions();
 
+
+        //Highlight the fastest path
+        shapeRenderer.setProjectionMatrix(camera.combined);
+        shapeRenderer.begin(ShapeRenderer.ShapeType.Line);
+        pathPrinter.highlightPath(shapeRenderer, target.getPosition(), actor.getPosition());
+        shapeRenderer.end();
+
+
+        spriteBatch.begin();
+        wallDrawer.render(spriteBatch);
+        spriteBatch.end();
 
         update();
+
+
     }
 
 
     private void update() {
-        pursue();
+        //pursue();
         boxDebugger.render(world, viewport.getCamera().combined);
-        actorController.handleActions();
-        handleTarget();
+        bodyController.handleActions();
+        bodyController.handleTarget();
 
     }
 
-    private void handleTarget() {
-        if (Gdx.input.isKeyPressed(Input.Keys.D))
-            target.applyLinearImpulse(new Vector2(1, 0), actor.getWorldCenter(), true);
-        else if (Gdx.input.isKeyPressed(Input.Keys.A))
-            target.applyLinearImpulse(new Vector2(-1, 0), actor.getWorldCenter(), true);
-        else if (Gdx.input.isKeyPressed(Input.Keys.W))
-            target.applyLinearImpulse(new Vector2(0, 1), actor.getWorldCenter(), true);
-        else if (Gdx.input.isKeyPressed(Input.Keys.S))
-            target.applyLinearImpulse(new Vector2(0, -1), actor.getWorldCenter(), true);
-        else
-            target.setLinearVelocity(0, 0);
-
-
-        if (target.getLinearVelocity().len2() > 1) {
-            actor.setLinearVelocity(actor.getLinearVelocity().scl(1));
-        }
-    }
 
     private void pursue() {
 
@@ -151,8 +151,8 @@ public class PlayScreen implements Screen {
             // System.out.println("targetPosition " + target.getPosition() + " actorposition " + actor.getPosition());
 
             MyNode pursueNode = myPathFinder.findNextNode(target.getPosition(), actor.getPosition());
-            //NodeDebugger.highLightNodeConnection(myPathFinder.getSourceNode(), box2dBuilder);
-            //System.out.println(pursueNode);
+            System.out.println(pursueNode);
+            timer = 0;
         }
         timer += Gdx.graphics.getDeltaTime();
 
