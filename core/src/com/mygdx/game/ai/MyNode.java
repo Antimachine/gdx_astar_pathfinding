@@ -42,6 +42,7 @@ public class MyNode {
 
     public void setIsWall() {
         isWall = true;
+        connections.clear();
     }
 
     public void addNeighbour(MyNode aNode) {
