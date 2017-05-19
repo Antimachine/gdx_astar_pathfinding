@@ -9,13 +9,15 @@ import com.badlogic.gdx.physics.box2d.Body;
  * Created by Evgheniy on 5/18/2017.
  */
 
-public class ActorController {
+public class BodyController {
 
     public static final float movingSpeed = 2f;
     private final Body actor;
+    private final Body target;
 
-    public ActorController(Body actor) {
+    public BodyController(Body actor, Body target) {
         this.actor = actor;
+        this.target = target;
 
     }
 
@@ -38,4 +40,25 @@ public class ActorController {
 
 
     }
+
+
+    public void handleTarget() {
+        if (Gdx.input.isKeyPressed(Input.Keys.D))
+            target.applyLinearImpulse(new Vector2(1, 0), target.getWorldCenter(), true);
+        else if (Gdx.input.isKeyPressed(Input.Keys.A))
+            target.applyLinearImpulse(new Vector2(-1, 0), target.getWorldCenter(), true);
+        else if (Gdx.input.isKeyPressed(Input.Keys.W))
+            target.applyLinearImpulse(new Vector2(0, 1), target.getWorldCenter(), true);
+        else if (Gdx.input.isKeyPressed(Input.Keys.S))
+            target.applyLinearImpulse(new Vector2(0, -1), target.getWorldCenter(), true);
+        else
+            target.setLinearVelocity(0, 0);
+
+
+        if (target.getLinearVelocity().len2() > 1) {
+            target.setLinearVelocity(target.getLinearVelocity().scl(1));
+        }
+    }
+
+
 }
