@@ -28,7 +28,7 @@ public class WorldCreator {
         nodeDefiner = new NodeDefiner();
     }
 
-    public void generateMap() {
+    public AStarMap generateMap() {
         MapLayers mapLayers = tiledMap.getLayers();
 
 
@@ -50,6 +50,6 @@ public class WorldCreator {
 
         AStarMap aStarMap = new AStarMap(mapWidth, mapHeight);
         nodeDefiner.defineWall(world, aStarMap);
-
+        return aStarMap;
     }
 }
