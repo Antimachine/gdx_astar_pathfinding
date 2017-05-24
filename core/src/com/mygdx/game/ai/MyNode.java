@@ -2,6 +2,7 @@ package com.mygdx.game.ai;
 
 import com.badlogic.gdx.ai.pfa.Connection;
 import com.badlogic.gdx.ai.pfa.DefaultConnection;
+import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.Array;
 
 import java.util.Locale;
@@ -27,6 +28,8 @@ public class MyNode {
         this.y = y;
         index = x * greaterMapMeasurement + y;
     }
+
+    public Vector2 getPosition(){return new Vector2(x,y);}
 
     public void select() {
         selected = true;

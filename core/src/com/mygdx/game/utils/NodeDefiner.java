@@ -15,10 +15,7 @@ public class NodeDefiner {
 
 
     public void defineWall(World world, AStarMap map) {
-
-        float lowerShift = 0.2f;
-        float higherShift = 0.8f;
-
+        
         QueryCallback callback = new QueryCallback() {
             @Override
             public boolean reportFixture(Fixture fixture) {
@@ -30,7 +27,7 @@ public class NodeDefiner {
         for (int y = 0; y < map.getHeight(); y++) {
             for (int x = 0; x < map.getWidth(); x++) {
                 wall = false;
-                world.QueryAABB(callback, x + lowerShift, y + lowerShift, x + higherShift, y + higherShift);
+                world.QueryAABB(callback, x, y, x , y);
                 if (wall)
                     map.getNodeAt(x, y).setIsWall();
             }

@@ -1,6 +1,7 @@
 package com.mygdx.game.screens;
 
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.Input;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
@@ -19,6 +20,7 @@ import com.mygdx.game.MyAiImpl;
 import com.mygdx.game.ai.AStarMap;
 import com.mygdx.game.ai.MyNode;
 import com.mygdx.game.ai.MyPathFinder;
+import com.mygdx.game.ai.steering.B2SteeringEntity;
 import com.mygdx.game.utils.B2Body;
 import com.mygdx.game.utils.BodyController;
 import com.mygdx.game.utils.MapManager;
@@ -50,6 +52,9 @@ public class PlayScreen implements Screen {
     private final ShapeRenderer shapeRenderer;
     private final AStarMap map;
     private final WallDrawer wallDrawer;
+    private MyNode pursueNode;
+    private boolean pursuingAllowed = true;
+
 
     public PlayScreen(MyAiImpl game) {
         spriteBatch = game.spriteBatch;
@@ -98,9 +103,7 @@ public class PlayScreen implements Screen {
                 .x(20)
                 .y(20)
                 .build().generateBody();
-
         bodyController = new BodyController(actor, target);
-
     }
 
     @Override
@@ -130,28 +133,38 @@ public class PlayScreen implements Screen {
         wallDrawer.render(spriteBatch);
         spriteBatch.end();
 
-        update();
+        update(delta);
 
 
     }
 
 
-    private void update() {
-        //pursue();
+    private void update(float dt) {
+        pursue();
         boxDebugger.render(world, viewport.getCamera().combined);
         bodyController.handleActions();
         bodyController.handleTarget();
-
     }
 
 
     private void pursue() {
 
-        if (timer > .5f) {
-            // System.out.println("targetPosition " + target.getPosition() + " actorposition " + actor.getPosition());
+        if (Gdx.input.isKeyJustPressed(Input.Keys.SPACE)) {
+            pursuingAllowed = !pursuingAllowed;
+            target.setLinearVelocity(0, 0);
+        }
 
-            MyNode pursueNode = myPathFinder.findNextNode(target.getPosition(), actor.getPosition());
-            System.out.println(pursueNode);
+
+        if (timer > .1f) {
+            pursueNode = myPathFinder.findNextNode(target.getPosition(), actor.getPosition());
+            if (pursueNode != null && isPursuingAllowed()) {
+                target.setTransform(pursueNode.getPosition(), 0);
+            }
+
+            if (target.getLinearVelocity().len2() > 2) {
+                target.setLinearVelocity(target.getLinearVelocity().scl(2 / target.getLinearVelocity().len()));
+            }
+
             timer = 0;
         }
         timer += Gdx.graphics.getDeltaTime();
@@ -181,5 +194,9 @@ public class PlayScreen implements Screen {
     @Override
     public void dispose() {
 
+    }
+
+    public boolean isPursuingAllowed() {
+        return pursuingAllowed;
     }
 }
