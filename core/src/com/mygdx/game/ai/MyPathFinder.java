@@ -25,6 +25,10 @@ public class MyPathFinder {
             new int[]{0, -1},
             new int[]{0, 1},
             new int[]{1, 0},
+            new int[]{1, -1},
+            new int[]{-1, 1},
+            new int[]{1, 1},
+            new int[]{1, -1}
     };
 
     public MyPathFinder(AStarMap map) {
